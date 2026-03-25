@@ -1,0 +1,16 @@
+{
+  "name": "ハートリフレ",
+  "short_name": "ハートリフレ",
+  "description": "心のしんどいを流して、愛のある言葉を受け取る",
+  "start_url": "/heart-refre-app/app.html",
+  "scope": "/heart-refre-app/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f4f0",
+  "theme_color": "#a8c4d4",
+  "lang": "ja",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

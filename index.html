@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ハートリフレ — 今日のしんどい、流していこう。</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f4f0;
+      --text: #2a2220;
+      --muted: #9a8a84;
+      --water: #a8c4d4;
+      --water-deep: #6a9ab0;
+      --pink: #e8a4b0;
+      --card: #ffffff;
+      --border: rgba(42,34,32,0.08);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      padding: 80px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(168,196,212,0.12) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .lp-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--water), var(--water-deep));
+      border-radius: 20px;
+      font-size: 32px;
+      margin-bottom: 20px;
+      box-shadow: 0 12px 32px rgba(106,154,176,0.35);
+    }
+
+    h1 {
+      font-family: 'Shippori Mincho', serif;
+      font-size: clamp(28px, 6vw, 42px);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      margin-bottom: 16px;
+    }
+
+    .lp-tagline {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 320px;
+      margin: 0 auto 32px;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      padding: 16px 40px;
+      background: linear-gradient(135deg, var(--water), var(--water-deep));
+      color: #fff;
+      text-decoration: none;
+      border-radius: 99px;
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      box-shadow: 0 8px 24px rgba(106,154,176,0.4);
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .cta-btn:hover { transform: translateY(-2px); opacity: 0.92; }
+
+    .cta-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+
+    /* ── Wave divider ── */
+    .wave-divider {
+      width: 100%;
+      height: 50px;
+      overflow: hidden;
+      line-height: 0;
+    }
+    .wave-divider svg { width: 100%; height: 100%; }
+
+    /* ── Sections ── */
+    section {
+      padding: 64px 24px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 22px;
+      font-weight: 500;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .section-sub {
+      font-size: 13.5px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+
+    /* ── How it works ── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 20px;
+      box-shadow: 0 2px 16px rgba(42,34,32,0.05);
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--water), var(--water-deep));
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .step-body strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .step-body p {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── Praise preview ── */
+    .praise-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .praise-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 12px rgba(42,34,32,0.04);
+      position: relative;
+    }
+
+    .praise-card::before {
+      content: attr(data-cat);
+      font-size: 11px;
+      color: var(--water-deep);
+      font-weight: 500;
+      display: block;
+      margin-bottom: 6px;
+      letter-spacing: 0.04em;
+    }
+
+    .praise-card p {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 15px;
+      line-height: 1.85;
+      color: var(--text);
+    }
+
+    /* ── Add to home ── */
+    .guide-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .guide-cards { grid-template-columns: 1fr; }
+    }
+
+    .guide-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(42,34,32,0.04);
+    }
+
+    .guide-card .device {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--water-deep);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .guide-card ol {
+      list-style: none;
+      counter-reset: step;
+    }
+
+    .guide-card ol li {
+      counter-increment: step;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      padding-left: 20px;
+      position: relative;
+      margin-bottom: 4px;
+    }
+
+    .guide-card ol li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 15px; height: 15px;
+      background: var(--water);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      margin-top: 2px;
+    }
+
+    /* ── Pricing ── */
+    .price-card {
+      background: var(--card);
+      border: 1.5px solid rgba(168,196,212,0.3);
+      border-radius: 20px;
+      padding: 36px 28px;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(106,154,176,0.12);
+    }
+
+    .price-tag {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 42px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 12px 0 4px;
+    }
+
+    .price-note {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    .price-features {
+      list-style: none;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+
+    .price-features li {
+      font-size: 14px;
+      color: var(--muted);
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .price-features li:last-child { border-bottom: none; }
+
+    .price-features .check {
+      color: var(--water-deep);
+      font-size: 16px;
+    }
+
+    /* Stripe placeholder */
+    .stripe-btn {
+      display: block;
+      width: 100%;
+      padding: 17px;
+      background: linear-gradient(135deg, var(--water), var(--water-deep));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(106,154,176,0.38);
+      transition: opacity 0.2s, transform 0.15s;
+      letter-spacing: 0.02em;
+    }
+    .stripe-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .stripe-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 48px 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    footer p {
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .footer-logo {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 18px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-bg"></div>
+  <div class="lp-logo">💧</div>
+  <h1>ハートリフレ</h1>
+  <p class="lp-tagline">今日のしんどい、ここに流していって。<br>保存しない・誰にも見えない。ただ、流すだけ。</p>
+  <a href="app.html" class="cta-btn">今すぐ使ってみる</a>
+  <p class="cta-note">ブラウザで無料体験中 ✦ ホーム画面に追加でいつでも使える</p>
+</header>
+
+<div class="wave-divider">
+  <svg viewBox="0 0 1200 50" preserveAspectRatio="none">
+    <path d="M0,25 C200,5 400,45 600,25 C800,5 1000,45 1200,25 L1200,50 L0,50 Z" fill="rgba(168,196,212,0.1)"/>
+  </svg>
+</div>
+
+<!-- How it works -->
+<section>
+  <h2 class="section-title">使い方はシンプル</h2>
+  <p class="section-sub">3ステップで、心が少し軽くなる。</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>カテゴリを選ぶ</strong>
+        <p>恋愛・仕事・人間関係・自分自身・家のこと。今日のしんどさに合うカテゴリを選んで。</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>書いて、流す</strong>
+        <p>テキストエリアにしんどかったことを書く。「流す」を押すと、水に流れるように消えていく。</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>褒め言葉を受け取る</strong>
+        <p>カテゴリに合った、あたたかい言葉がひとつ届く。今日のあなたに向けた言葉。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Praise preview -->
+<section style="background: rgba(168,196,212,0.06); border-radius: 24px; margin: 0 12px;">
+  <h2 class="section-title">こんな言葉が届くよ</h2>
+  <p class="section-sub">100種類の言葉から、ランダムに1つ。</p>
+  <div class="praise-cards">
+    <div class="praise-card" data-cat="💕 恋愛">
+      <p>あなたが悩むくらい、それだけ本気だってこと。</p>
+    </div>
+    <div class="praise-card" data-cat="💼 仕事">
+      <p>今日もちゃんと出勤した、それだけで花丸だよ。</p>
+    </div>
+    <div class="praise-card" data-cat="👥 人間関係">
+      <p>相手の機嫌はあなたのせいじゃないよ。</p>
+    </div>
+    <div class="praise-card" data-cat="😔 自分自身">
+      <p>あなたの「普通」は、誰かの「すごい」だよ。</p>
+    </div>
+  </div>
+</section>
+
+<!-- Add to home screen -->
+<section>
+  <h2 class="section-title">📱 アプリとして使う方法</h2>
+  <p class="section-sub">ホーム画面に追加すると、アプリみたいに使えるよ。</p>
+  <div class="guide-cards">
+    <div class="guide-card">
+      <div class="device">🍎 iPhone (Safari)</div>
+      <ol>
+        <li>このページを Safari で開く</li>
+        <li>画面下の「共有」ボタンをタップ</li>
+        <li>「ホーム画面に追加」を選ぶ</li>
+        <li>「追加」をタップして完了</li>
+      </ol>
+    </div>
+    <div class="guide-card">
+      <div class="device">🤖 Android (Chrome)</div>
+      <ol>
+        <li>このページを Chrome で開く</li>
+        <li>右上メニュー（⋮）をタップ</li>
+        <li>「ホーム画面に追加」を選ぶ</li>
+        <li>「追加」をタップして完了</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section>
+  <h2 class="section-title">料金</h2>
+  <p class="section-sub">一度買ったら、ずっと使える。</p>
+  <div class="price-card">
+    <div style="font-size:13px; color:var(--water-deep); font-weight:500; letter-spacing:0.06em;">BUY ONCE</div>
+    <div class="price-tag">¥300</div>
+    <p class="price-note">買い切り・サブスク不要</p>
+    <ul class="price-features">
+      <li><span class="check">✦</span> 100種類の褒め言葉</li>
+      <li><span class="check">✦</span> 5カテゴリ対応</li>
+      <li><span class="check">✦</span> 入力内容は一切保存しない</li>
+      <li><span class="check">✦</span> ホーム画面アプリとして使える</li>
+      <li><span class="check">✦</span> 広告なし</li>
+    </ul>
+    <!-- Stripe Checkout ここに設置 (Phase 2) -->
+    <a href="app.html" class="stripe-btn">今すぐ無料で試す →</a>
+    <p class="stripe-sub">※ 現在無料体験中。近日¥300の買い切りに移行予定。</p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">ハートリフレ</div>
+  <p>
+    AETHERCORE mini<br>
+    <a href="https://torihikimoen-create.github.io/aethercore-mini/" style="color:var(--muted);">ほかのアプリを見る</a>
+  </p>
+</footer>
+
+</body>
+</html>

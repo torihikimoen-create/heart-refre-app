@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ハートリフレ</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#a8c4d4">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ハートリフレ">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f4f0;
+      --text: #2a2220;
+      --muted: #9a8a84;
+      --water: #a8c4d4;
+      --water-deep: #6a9ab0;
+      --pink: #e8a4b0;
+      --card: #ffffff;
+      --border: rgba(42,34,32,0.08);
+      --radius: 16px;
+      --shadow: 0 4px 24px rgba(42,34,32,0.06);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* ── Water background ── */
+    .water-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .ripple {
+      position: absolute;
+      left: 50%;
+      bottom: 8%;
+      width: 6px;
+      height: 6px;
+      margin-left: -3px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(168, 196, 212, 0.28);
+      animation: ripple-expand 9s ease-out infinite;
+    }
+    .ripple:nth-child(2) { animation-delay: 3s; }
+    .ripple:nth-child(3) { animation-delay: 6s; }
+
+    @keyframes ripple-expand {
+      0%   { transform: scale(1); opacity: 0.6; }
+      100% { transform: scale(360); opacity: 0; }
+    }
+
+    /* ── App shell ── */
+    #app {
+      position: relative;
+      z-index: 1;
+      height: 100dvh;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Views ── */
+    .view {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      padding: 28px 22px max(env(safe-area-inset-bottom, 20px), 24px);
+      overflow-y: auto;
+      animation: fade-up 0.38s ease;
+    }
+    .view.active { display: flex; }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ══════════════════════════
+       HOME VIEW
+    ══════════════════════════ */
+    .home-header {
+      text-align: center;
+      padding: 36px 0 28px;
+    }
+
+    .home-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px; height: 60px;
+      background: linear-gradient(135deg, var(--water), var(--water-deep));
+      border-radius: 18px;
+      font-size: 28px;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 24px rgba(106,154,176,0.35);
+    }
+
+    .home-title {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 30px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .home-sub {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.75;
+      max-width: 260px;
+      margin: 0 auto 16px;
+    }
+
+    .home-divider {
+      width: 40px; height: 2.5px;
+      background: linear-gradient(to right, var(--water), var(--pink));
+      border-radius: 2px;
+      margin: 0 auto;
+    }
+
+    .home-prompt {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 14px;
+      letter-spacing: 0.03em;
+    }
+
+    /* Category grid */
+    .categories {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 11px;
+      flex: 1;
+      align-content: center;
+    }
+
+    .cat-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      box-shadow: var(--shadow);
+      user-select: none;
+    }
+    .cat-card:hover  { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(42,34,32,0.09); }
+    .cat-card:active { transform: scale(0.97); }
+    .cat-card.full   { grid-column: 1 / -1; padding: 18px 14px; }
+
+    .cat-emoji { font-size: 30px; display: block; margin-bottom: 7px; }
+    .cat-name  { font-size: 14px; font-weight: 500; color: var(--text); }
+
+    /* ══════════════════════════
+       INPUT VIEW
+    ══════════════════════════ */
+    .back-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 13.5px;
+      font-family: 'DM Sans', sans-serif;
+      padding: 6px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .back-btn:hover { color: var(--text); }
+
+    .cat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, var(--water), var(--water-deep));
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 22px;
+      align-self: flex-start;
+    }
+
+    .input-question {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 21px;
+      font-weight: 500;
+      line-height: 1.55;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    #input-area {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      transition: transform 1s cubic-bezier(0.4,0,1,1),
+                  opacity 0.7s ease-in,
+                  filter 0.7s ease-in;
+    }
+    #input-area.flowing {
+      transform: translateY(160px);
+      opacity: 0;
+      filter: blur(7px);
+      pointer-events: none;
+    }
+
+    #input-text {
+      flex: 1;
+      min-height: 160px;
+      max-height: 260px;
+      width: 100%;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 15px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      color: var(--text);
+      resize: none;
+      outline: none;
+      line-height: 1.7;
+      box-shadow: var(--shadow);
+      transition: border-color 0.2s ease;
+    }
+    #input-text:focus  { border-color: var(--water); }
+    #input-text::placeholder { color: var(--muted); opacity: 0.65; }
+
+    .flow-btn {
+      margin-top: 18px;
+      width: 100%;
+      padding: 17px;
+      background: linear-gradient(135deg, var(--water), var(--water-deep));
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Shippori Mincho', serif;
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(106,154,176,0.4);
+      transition: opacity 0.2s, transform 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .flow-btn:hover  { opacity: 0.92; transform: translateY(-1px); }
+    .flow-btn:active { transform: scale(0.98); }
+
+    /* Button ripple */
+    .btn-ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: scale(0);
+      animation: btn-ripple 0.6s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes btn-ripple {
+      to { transform: scale(4); opacity: 0; }
+    }
+
+    .privacy-note {
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 11px;
+      opacity: 0.75;
+      letter-spacing: 0.03em;
+    }
+
+    /* ══════════════════════════
+       PRAISE VIEW
+    ══════════════════════════ */
+    #view-praise {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 0;
+    }
+
+    .praise-icon-wrap {
+      font-size: 46px;
+      margin-bottom: 28px;
+      animation: float 3.5s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-9px); }
+    }
+
+    #praise-text {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 1.95;
+      color: var(--text);
+      max-width: 300px;
+      margin: 0 auto 14px;
+      opacity: 0;
+      transform: translateY(-18px);
+      transition: opacity 0.85s ease, transform 0.85s ease;
+    }
+    #praise-text.show { opacity: 1; transform: translateY(0); }
+
+    .praise-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 40px;
+      opacity: 0;
+      transition: opacity 0.6s ease 0.5s;
+    }
+    .praise-sub.show { opacity: 1; }
+
+    .praise-wave {
+      width: 100%;
+      max-width: 280px;
+      margin: 0 auto 32px;
+      opacity: 0;
+      transition: opacity 0.5s ease 0.3s;
+    }
+    .praise-wave.show { opacity: 0.25; }
+
+    .praise-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      width: 100%;
+      max-width: 300px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.6s ease 0.7s, transform 0.6s ease 0.7s;
+    }
+    .praise-btns.show { opacity: 1; transform: translateY(0); }
+
+    .btn-again {
+      padding: 16px;
+      background: linear-gradient(135deg, var(--water), var(--water-deep));
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(106,154,176,0.35);
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-again:hover  { opacity: 0.9; }
+    .btn-again:active { transform: scale(0.98); }
+
+    .btn-done {
+      padding: 15px;
+      background: transparent;
+      color: var(--muted);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14.5px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-done:hover { color: var(--text); border-color: rgba(42,34,32,0.18); }
+  </style>
+</head>
+<body>
+
+<!-- Water ripple background -->
+<div class="water-bg">
+  <div class="ripple"></div>
+  <div class="ripple"></div>
+  <div class="ripple"></div>
+</div>
+
+<div id="app">
+
+  <!-- ① Home -->
+  <div class="view active" id="view-home">
+    <div class="home-header">
+      <div class="home-logo">💧</div>
+      <h1 class="home-title">ハートリフレ</h1>
+      <p class="home-sub">今日のしんどい、ここに流していって。<br>心をリフレッシュしよう。</p>
+      <div class="home-divider"></div>
+    </div>
+
+    <p class="home-prompt">カテゴリを選んでね</p>
+
+    <div class="categories">
+      <div class="cat-card" onclick="selectCategory('romance')">
+        <span class="cat-emoji">💕</span>
+        <span class="cat-name">恋愛</span>
+      </div>
+      <div class="cat-card" onclick="selectCategory('work')">
+        <span class="cat-emoji">💼</span>
+        <span class="cat-name">仕事</span>
+      </div>
+      <div class="cat-card" onclick="selectCategory('relation')">
+        <span class="cat-emoji">👥</span>
+        <span class="cat-name">人間関係</span>
+      </div>
+      <div class="cat-card" onclick="selectCategory('self')">
+        <span class="cat-emoji">😔</span>
+        <span class="cat-name">自分自身</span>
+      </div>
+      <div class="cat-card full" onclick="selectCategory('home')">
+        <span class="cat-emoji">🏠</span>
+        <span class="cat-name">家のこと</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② Input -->
+  <div class="view" id="view-input">
+    <button class="back-btn" onclick="showView('home')">← もどる</button>
+    <div class="cat-badge" id="cat-badge">💕 恋愛</div>
+    <h2 class="input-question">今日、<br>何がしんどかった？</h2>
+
+    <div id="input-area">
+      <textarea id="input-text" placeholder="ここに書いて、流してね。誰にも見えないよ。"></textarea>
+      <button class="flow-btn" id="flow-btn" onclick="flowText(event)">流す</button>
+      <p class="privacy-note">✦ 入力した内容は保存されません ✦</p>
+    </div>
+  </div>
+
+  <!-- ③ Praise -->
+  <div class="view" id="view-praise">
+    <div class="praise-icon-wrap" id="praise-icon">💧</div>
+    <p id="praise-text"></p>
+    <p class="praise-sub" id="praise-sub">ちゃんと流れていったよ。</p>
+
+    <svg class="praise-wave" id="praise-wave" viewBox="0 0 280 20" preserveAspectRatio="none">
+      <path d="M0,10 C35,0 70,20 105,10 C140,0 175,20 210,10 C245,0 280,20 280,10" stroke="#a8c4d4" stroke-width="2" fill="none"/>
+    </svg>
+
+    <div class="praise-btns" id="praise-btns">
+      <button class="btn-again" onclick="flowAgain()">もう一度流す</button>
+      <button class="btn-done" onclick="showView('home')">今日はおわり</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════
+   PRAISE DATA
+═══════════════════════════════ */
+const praiseRomance = [
+  "好きな人がいるだけで、あなたは今日も輝いてたよ。",
+  "ちゃんと傷つけるのは、ちゃんと好きだから。",
+  "あなたの気持ち、絶対に伝わってるよ。",
+  "一生懸命になれる恋ができてる、それだけでえらい。",
+  "今日泣いた分、明日はきっともっとやさしくなれる。",
+  "好きって思える心、大切にしてね。",
+  "あなたが悩むくらい、それだけ本気だってこと。",
+  "うまくいかない日も、あなたの恋は本物だよ。",
+  "ドキドキできる心、素敵だと思う。",
+  "自分の気持ちに正直でいるあなたが好きだよ。",
+  "待てるのも、愛情のかたちだよ。",
+  "今日の痛みは、きっとあとで意味を持つ。",
+  "感情を持てることは、才能だから。",
+  "あなたが選んだ恋、間違ってないよ。",
+  "不安になるくらい、それだけ大切に思ってる証拠。",
+  "あなたを好きになった人は、幸せ者だよ。",
+  "今のあなたのままで、十分魅力的だよ。",
+  "うまく言えなかった言葉も、ちゃんと届いてるよ。",
+  "すれ違っても、気持ちは本物だよ。",
+  "焦らなくていい。あなたのペースで大丈夫。",
+  "恋してるあなた、ちゃんとかわいいよ。",
+  "傷ついたってことは、それだけ心を開いてたってこと。",
+  "諦めない気持ち、大事にしてね。",
+  "今日もあなたなりに精いっぱいだったね。",
+  "少しくらいわがままでいい。あなたにはその権利があるよ。",
+  "自分を責めないで。あなたは悪くない。",
+  "好きな人のことを考えられる今が、青春だよ。",
+  "また明日、笑えるよ。",
+  "今日みたいな夜があっても、朝はちゃんと来る。",
+  "あなたの恋、応援してるよ。",
+  "全部うまくいかなくてもいい。今日だけの話だから。",
+  "泣いてもいい。でもあなたは強い。",
+  "気持ちを持ち続けてること、それだけでえらいよ。",
+  "あなたが幸せになる番、きっとくる。",
+  "今日のしんどさ、ちゃんと流していってね。",
+];
+
+const praiseWork = [
+  "今日も働いてえらい。本当にえらい。",
+  "頑張った自分を、ちゃんと認めてあげて。",
+  "今日こなしたこと、全部あなたの実績だよ。",
+  "完璧じゃなくても、続けてることがすごい。",
+  "疲れるくらい本気でやってる、それがあなたの誠実さだよ。",
+  "うまくいかなかった日も、積み重ねてるよ。",
+  "今日の失敗は、明日の糧になってるよ。",
+  "誰にも言えない努力も、ちゃんと見てる人がいる。",
+  "休んでいい。休むことも仕事のうち。",
+  "今日のあなた、ちゃんとよくやったよ。",
+  "給料分より、きっともっとやってるよ。",
+  "気を遣いながら働くのは、二倍疲れるよね。お疲れ様。",
+  "怒られた日も、動じないで働いてえらい。",
+  "報われない日も、あなたの頑張りは本物だよ。",
+  "今日もちゃんと出勤した、それだけで花丸だよ。",
+  "誰かのために動けるあなたは、職場の宝だよ。",
+  "失敗しても来た、それが一番強いことだよ。",
+  "向いてないかもと思っても続けてる、それは立派だよ。",
+  "今日の仕事、ぜんぶ流していっていいよ。",
+  "明日の自分に任せて、今日はもう休んで。",
+  "あなたがいるから回ってることがある。",
+  "しんどいって感じるのは、真剣にやってる証拠だよ。",
+  "今日も一日、お疲れ様でした。",
+  "週末まで、あと少しだよ。",
+  "今夜はゆっくり休んでね。",
+];
+
+const praiseRelation = [
+  "あなたは悪くないよ。",
+  "気を使えるあなたは、やさしすぎるくらいやさしい。",
+  "全員に好かれなくていい。あなたを大切にしてくれる人がいる。",
+  "距離を置くことも、ひとつの答えだよ。",
+  "ムリして合わせなくていい。",
+  "相手の機嫌はあなたのせいじゃないよ。",
+  "傷ついたなら、それは傷つけた側の問題だよ。",
+  "あなたが感じた気持ちは、ぜんぶ本物だよ。",
+  "言えなかった言葉も、ちゃんとあなたの中で生きてるよ。",
+  "嫌いって思っていい。感情に正直でいていい。",
+  "逃げることも、自分を守ることだよ。",
+  "あなたを傷つける人とは、離れていい。",
+  "今日のもやもや、全部流していってね。",
+  "あなたのことを本当に大切にしてくれる人がいる。",
+  "無理に仲良くしなくていい。",
+  "人間関係は、合う合わないがある。あなたのせいじゃない。",
+  "誠実に生きてるあなたは、それだけで十分だよ。",
+  "しんどい関係から離れていい。あなたの幸せが最優先。",
+  "いつかわかってくれる人が現れる。",
+  "今日もよく耐えたよ。",
+];
+
+const praiseSelf = [
+  "そのままのあなたで、十分だよ。",
+  "今日も生きてえらい。",
+  "完璧じゃなくていい。あなたはあなたでいい。",
+  "誰かと比べなくていい。あなたにはあなたのペースがある。",
+  "休みたい日は休んでいい。",
+  "ネガティブな自分も、あなたの一部だよ。",
+  "自分を責めるの、今日はやめにしよう。",
+  "弱い自分も、ちゃんと受け入れてあげて。",
+  "今日のあなた、よくやってたよ。",
+  "自分のことを一番大切にしていい。",
+  "泣いていい。それも強さのひとつだから。",
+  "ゆっくりでいい。急がなくていい。",
+  "あなたの「普通」は、誰かの「すごい」だよ。",
+  "今夜はただ、自分をいたわってあげて。",
+  "明日の自分に期待していい。",
+];
+
+const praiseHome = [
+  "家のことも、立派な仕事だよ。",
+  "全部やろうとしなくていい。今日できた分で十分。",
+  "家が安心できる場所でいられるように動いてる、えらいよ。",
+  "今日はゆっくり休んで。明日でいいことは明日でいい。",
+  "自分のペースで大丈夫だよ。",
+];
+
+const praiseMap = {
+  romance: praiseRomance,
+  work:    praiseWork,
+  relation:praiseRelation,
+  self:    praiseSelf,
+  home:    praiseHome,
+};
+
+const catInfo = {
+  romance:  { badge: '💕 恋愛',  icon: '💕', placeholder: '好きな人とのこと、ドキドキもモヤモヤも、ぜんぶここに。' },
+  work:     { badge: '💼 仕事',  icon: '✨', placeholder: '理不尽なこと、疲れたこと、うまくいかなかったこと。' },
+  relation: { badge: '👥 人間関係', icon: '🌊', placeholder: 'モヤモヤしてること、うまくいかなかったこと。' },
+  self:     { badge: '😔 自分自身', icon: '🌸', placeholder: '自分がいやになったこと、ネガティブな気持ち。' },
+  home:     { badge: '🏠 家のこと', icon: '☕', placeholder: '片付かなかった、疲れてなにもできなかった、など。' },
+};
+
+/* ═══════════════════════════════
+   STATE
+═══════════════════════════════ */
+const REQUIRE_KEY = false;
+let selectedCat = null;
+let isFlowing = false;
+
+/* ═══════════════════════════════
+   VIEWS
+═══════════════════════════════ */
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+}
+
+/* ═══════════════════════════════
+   CATEGORY SELECT
+═══════════════════════════════ */
+function selectCategory(cat) {
+  selectedCat = cat;
+  const info = catInfo[cat];
+  document.getElementById('cat-badge').textContent = info.badge;
+  document.getElementById('input-text').placeholder = info.placeholder;
+  document.getElementById('input-text').value = '';
+  document.getElementById('input-area').classList.remove('flowing');
+  isFlowing = false;
+  showView('input');
+  // slight delay then focus
+  setTimeout(() => document.getElementById('input-text').focus(), 350);
+}
+
+/* ═══════════════════════════════
+   FLOW ANIMATION
+═══════════════════════════════ */
+function flowText(e) {
+  if (isFlowing) return;
+  const text = document.getElementById('input-text').value.trim();
+  if (!text) {
+    // shake hint
+    const btn = document.getElementById('flow-btn');
+    btn.style.transition = 'transform 0.08s';
+    const shakes = [6,-6,5,-5,3,-3,0];
+    shakes.forEach((x, i) => {
+      setTimeout(() => { btn.style.transform = `translateX(${x}px)`; }, i * 60);
+    });
+    return;
+  }
+
+  // Ripple on button
+  if (e) {
+    const btn = document.getElementById('flow-btn');
+    const rect = btn.getBoundingClientRect();
+    const r = document.createElement('span');
+    r.className = 'btn-ripple';
+    const size = Math.max(btn.offsetWidth, btn.offsetHeight);
+    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size/2}px;top:${e.clientY - rect.top - size/2}px`;
+    btn.appendChild(r);
+    setTimeout(() => r.remove(), 650);
+  }
+
+  isFlowing = true;
+  document.getElementById('input-area').classList.add('flowing');
+
+  setTimeout(() => {
+    // Content is NOT saved
+    document.getElementById('input-text').value = '';
+    document.getElementById('input-area').classList.remove('flowing');
+    isFlowing = false;
+    showPraise();
+  }, 1050);
+}
+
+/* ═══════════════════════════════
+   PRAISE DISPLAY
+═══════════════════════════════ */
+function showPraise() {
+  const list = praiseMap[selectedCat] || praiseSelf;
+  const praise = list[Math.floor(Math.random() * list.length)];
+
+  const praiseEl  = document.getElementById('praise-text');
+  const subEl     = document.getElementById('praise-sub');
+  const btnsEl    = document.getElementById('praise-btns');
+  const waveEl    = document.getElementById('praise-wave');
+  const iconEl    = document.getElementById('praise-icon');
+
+  // Reset
+  [praiseEl, subEl, btnsEl, waveEl].forEach(el => el.classList.remove('show'));
+  praiseEl.textContent = praise;
+  iconEl.textContent = catInfo[selectedCat]?.icon || '💧';
+
+  showView('praise');
+
+  // Staggered reveal
+  requestAnimationFrame(() => {
+    setTimeout(() => praiseEl.classList.add('show'), 80);
+    setTimeout(() => waveEl.classList.add('show'),   300);
+    setTimeout(() => subEl.classList.add('show'),    500);
+    setTimeout(() => btnsEl.classList.add('show'),   720);
+  });
+}
+
+function flowAgain() {
+  document.getElementById('input-text').value = '';
+  document.getElementById('input-area').classList.remove('flowing');
+  isFlowing = false;
+  showView('input');
+  setTimeout(() => document.getElementById('input-text').focus(), 350);
+}
+
+/* ═══════════════════════════════
+   SERVICE WORKER
+═══════════════════════════════ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
